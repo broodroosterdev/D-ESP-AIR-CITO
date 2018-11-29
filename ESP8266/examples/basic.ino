@@ -16,11 +16,6 @@ void setup(void)
   Serial.begin(115200);
 
   initBME680();
-  //checkIaqSensorStatus();
-
-  // Print the header
-  //output = "Timestamp [ms], raw temperature [°C], pressure [hPa], raw relative humidity [%], gas [Ohm], IAQ, IAQ accuracy, temperature [°C], relative humidity [%]";
-  //Serial.println(output);
 }
 
 // Function that is looped forever
