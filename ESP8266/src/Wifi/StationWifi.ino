@@ -2,7 +2,7 @@
 #include <ESP8266WiFi.h>
 #include <Adafruit_MQTT.h>
 #include <Adafruit_MQTT_Client.h>
-#include "./Wifi.h>
+#include "./WifiCreds.h"
 
 /************************* WiFi Access Point *********************************/
 
@@ -36,8 +36,6 @@ Adafruit_MQTT_Subscribe onoffbutton = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAM
 
 /*************************** Sketch Code ************************************/
 
-// Bug workaround for Arduino 1.6.6, it seems to need a function declaration
-// for some reason (only affects ESP8266, likely an arduino-builder bug).
 void MQTT_connect();
 
 // Helper functions declarations
@@ -110,7 +108,7 @@ void initBME680(void)
     BSEC_OUTPUT_RAW_PRESSURE,
     BSEC_OUTPUT_RAW_HUMIDITY,
     BSEC_OUTPUT_RAW_GAS,
-    BSEC_OUTPUT_IAQ_ESTIMATE,
+    BSEC_OUTPUT_IAQ,
     BSEC_OUTPUT_SENSOR_HEAT_COMPENSATED_TEMPERATURE,
     BSEC_OUTPUT_SENSOR_HEAT_COMPENSATED_HUMIDITY,
   };
