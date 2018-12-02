@@ -1,5 +1,5 @@
 #include <bsec.h>
-#include "./LED.h"
+#include "../libraries/LED.h"
 
 // Helper functions declarations
 void checkIaqSensorStatus(void);
