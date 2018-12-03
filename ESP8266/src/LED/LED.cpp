@@ -10,6 +10,7 @@ LED::LED(uint8_t pin, uint16_t leds){
 
 void LED::Begin()
 {
+ 
   _strip.begin();
   _strip.show();
   _strip.setBrightness(255);
