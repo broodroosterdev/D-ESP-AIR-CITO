@@ -18,7 +18,8 @@ void LED::Begin()
 void LED::ShowIAQ(float IAQ)
 {
   int iaq = static_cast<int>(round(IAQ));
-  int ledscore = map(500 - iaq,500,0,20,0);
+  int ledscore = map(350 - iaq,350,0,20,0);
+  if(ledscore < 0){ledscore = 0;}
   uint32_t displayColor = _strip.Color(_colors[ledscore][0],_colors[ledscore][1],_colors[ledscore][2]);
   _strip.fill(displayColor, 0, _leds);
   _strip.show();

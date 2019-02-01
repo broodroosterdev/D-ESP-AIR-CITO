@@ -2,23 +2,24 @@
 #include <ESP8266WiFi.h>
 #include <Adafruit_MQTT.h>
 #include <Adafruit_MQTT_Client.h>
-
+//needed for wifimanager
+#include <DNSServer.h>
+#include <ESP8266WebServer.h>
+#include <WiFiManager.h>
 // Set the MQTT feeds to be used
-#define temperature_feed "/sensors/temperature"
-#define humidity_feed "/sensors/humidity"
-#define pressure_feed "/sensors/pressure"
-#define iaq_feed "/sensors/iaq"
+#define temperature_feed "/sensors/temperature/1"
+#define humidity_feed "/sensors/humidity/1"
+#define pressure_feed "/sensors/pressure/1"
+#define iaq_feed "/sensors/iaq/1"
 
 /************************* WiFi Access Point *********************************/
 
 WiFiClientSecure client;
-#define WLAN_SSID ""
-#define WLAN_PASS ""
 
 /************************* MQTT Broker Setup *********************************/
 
-#define AIO_SERVER      "192.168.178.33"
-#define AIO_SERVERPORT  443                   // 8883 for MQTTS
+#define AIO_SERVER      "pwsvps.ddns.net"
+#define AIO_SERVERPORT  1883                  // 8883 for MQTTS
 #define AIO_USERNAME    "mqttusername"
 #define AIO_KEY         "mqttpassword"
 
@@ -45,19 +46,9 @@ String output;
 void setup(void)
 {
   Serial.begin(115200);
-  int wifitry = 0;
-  WiFi.begin(WLAN_SSID, WLAN_PASS);
-  delay(500);
-
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
-    wifitry++;
-    if (wifitry >= 50) {
-      Serial.println("Can't connect to WiFi, activating deepsleep");
-      wifitry = 0;
-    }
-  }
+  WiFiManager wifiManager;
+  wifiManager.autoConnect();
+  Serial.println("connected...jeej :)");
   MQTT_connect();
   initBME680();
 }
