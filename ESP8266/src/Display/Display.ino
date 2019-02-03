@@ -1,4 +1,5 @@
 /************************* Including Libraries *********************************/
+//Libraries nodig voor de sketch
 #include "bsec.h"
 #include <ESP8266WiFi.h>
 #include <Adafruit_MQTT.h>
@@ -10,8 +11,8 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 #include "LED.h"
-
 /************************* Defining Variables **********************************/
+//Globale variabelen
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
 #define SCREEN_HEIGHT 32 // OLED display height, in pixels
 #define temperature_feed "/sensors/temperature/1"
@@ -23,30 +24,31 @@
 #define memory_feed "/sensors/memory/1"
 #define rssi_feed "/sensors/rssi/1"
 #define restart_feed "/sensors/restart/1"
+#define led_feed "/sensors/led/1"
 #define AIO_SERVER      "pwsvps.ddns.net"
 #define AIO_SERVERPORT  1883                  // 8883 for MQTTS
 #define AIO_USERNAME    "mqttusername"
 #define AIO_KEY         "mqttpassword"
-
 /************************* Defining helper functions *********************************/
+//Functies voor het checken van werking van Sensor
 void checkIaqSensorStatus(void);
 void errLeds(void);
-
 /************************* Creating Objects for hardware components *********************************/
+//Maakt objecten voor alle hardware
 WiFiClientSecure client;
 Bsec iaqSensor;
 LED led = LED(12,5);
 Adafruit_SSD1306 _display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire);
-
 /************************* Defining global variables *********************************/
+//Globale variabelen
 int _isloading = 0;
 int _sliding = 0;
 int slide = 0;
 String output;
 volatile int toggle;
 String unit;
-
 /************************* Defining MQTT server and topics *********************************/
+//Maakt MQTT objecten
 Adafruit_MQTT_Client mqtt(&client, AIO_SERVER, AIO_SERVERPORT);
 Adafruit_MQTT_Publish temperature_topic = Adafruit_MQTT_Publish(&mqtt, temperature_feed);
 Adafruit_MQTT_Publish pressure_topic = Adafruit_MQTT_Publish(&mqtt, pressure_feed);
@@ -57,8 +59,9 @@ Adafruit_MQTT_Publish uptime_topic = Adafruit_MQTT_Publish(&mqtt, uptime_feed);
 Adafruit_MQTT_Publish memory_topic = Adafruit_MQTT_Publish(&mqtt, memory_feed);
 Adafruit_MQTT_Publish rssi_topic = Adafruit_MQTT_Publish(&mqtt, rssi_feed);
 Adafruit_MQTT_Subscribe restart_topic = Adafruit_MQTT_Subscribe(&mqtt, restart_feed);
-
+Adafruit_MQTT_Subscribe led_topic = Adafruit_MQTT_Subscribe(&mqtt, led_feed);
 /************************* Defining bitmap of icons *********************************/
+//Bitmap arrays voor alle iconen
 const unsigned char PROGMEM _warning[] = {
   0x0,0x1,0x80,0x0,
   0x0,0x1,0x80,0x0,
@@ -127,7 +130,6 @@ const unsigned char PROGMEM _loading1[] = {
   0x0,0x1,0x80,0x0,
   0x0,0x1,0x80,0x0
 };
-
   const unsigned char PROGMEM _loading[] = {
   0x0,0x0,0x0,0x0,
   0x0,0x18,0x18,0x0,
@@ -265,15 +267,17 @@ const unsigned char PROGMEM _humidity[]  = {
   0x0,0x0,0x0,0x0
 };
 /************************* Setup Function *********************************/
+//Functie die draait wanneer ESP opstart
 void setup(void)
 {
-  Serial.begin(115200);
+  Serial.begin(115200); //Begint seriële poort
   if(!_display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) { // Address 0x3C for 128x32
     for(;;); // Don't proceed, loop forever
   }
-    _display.clearDisplay();
-    _display.display();
+  _display.clearDisplay(); //
+  _display.display();
   mqtt.subscribe(&restart_topic);
+  mqtt.subscribe(&led_topic);
   StartLoading();
   iaqSensor.begin(BME680_I2C_ADDR_PRIMARY, Wire);
   loading_handler();
@@ -320,6 +324,15 @@ void loop(void)
       Serial.println("Restarting.....");
       ESP.restart();
     }
+    if (subscription == &led_topic) {
+    uint8_t led_status = atoi((char*)led_topic.lastread);
+    uint8_t led_on = 1;
+    if(led_status == led_on){
+      led.EnableLED(iaqSensor);
+    }else{
+      led.DisableLED();
+    }
+  }
   }
   unsigned long time_trigger = millis();
   if (iaqSensor.run()) { // If new data is available
@@ -337,6 +350,8 @@ void loop(void)
     sliding_handler();
   } else {
     checkIaqSensorStatus();
+  
+
   }
 
 }

@@ -1,18 +1,25 @@
 #ifndef LED_h
 #define LED_h
+/*
+Controleert of de library al een keer included is zodat het niet dubbel defined wordt*/
 
 #include <Adafruit_NeoPixel.h>
-
-class LED
+#include "bsec.h"
+class LED //Class of the library
 {
-  public:
+  public://All of the functions exposed by library
     LED(uint8_t pin=12, uint16_t leds=5);
     void Begin();
     void ShowIAQ(float IAQ);
-  private:
+    void EnableLED(Bsec Sensor);
+    void DisableLED();
+  private://Variables used by only the library itself
+    uint8_t _enabled = 1;
     uint8_t _pin;
+    uint8_t _reinit = 0;
     uint16_t _leds;
-    uint8_t _colors[21][3] = {
+    float _previous_iaq;
+    uint8_t _colors[21][3] = { //Color range from red to green
         {255,0,0},
         {242,13,0},
         {230,26,0},
