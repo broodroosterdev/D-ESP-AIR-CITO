@@ -44,3 +44,25 @@ void LED::DisableLED(){ //Zet de ledstrip uit
     _strip.show();
   }
 }
+void LED::ShowRainbow(){
+  uint16_t i, j;
+  for(j=0; j<256; j++) { // 5 cycles of all colors on wheel
+    for(i=0; i< _leds; i++) {
+      _strip.setPixelColor(i, LED::Wheel((i * 256 / _leds + j) & 255));
+    }
+    _strip.show();
+    delay(10);
+}
+}
+uint32_t LED::Wheel(byte WheelPos){
+  WheelPos = 255 - WheelPos;
+  if(WheelPos < 85) {
+    return _strip.Color(255 - WheelPos * 3, 0, WheelPos * 3);
+  }
+  if(WheelPos < 170) {
+    WheelPos -= 85;
+    return _strip.Color(0, WheelPos * 3, 255 - WheelPos * 3);
+  }
+  WheelPos -= 170;
+  return _strip.Color(WheelPos * 3, 255 - WheelPos * 3, 0);
+}

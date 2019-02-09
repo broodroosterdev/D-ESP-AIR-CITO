@@ -13,6 +13,8 @@ class LED //Class of the library
     void ShowIAQ(float IAQ);
     void EnableLED(Bsec Sensor);
     void DisableLED();
+    void ShowRainbow();
+    uint32_t Wheel(byte WheelPos);
   private://Variables used by only the library itself
     uint8_t _enabled = 1;
     uint8_t _pin;

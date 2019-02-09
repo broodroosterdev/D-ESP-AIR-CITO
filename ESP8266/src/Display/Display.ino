@@ -279,19 +279,30 @@ void setup(void)
   mqtt.subscribe(&restart_topic);
   mqtt.subscribe(&led_topic);
   StartLoading();
+  unit = "MQTT";
   iaqSensor.begin(BME680_I2C_ADDR_PRIMARY, Wire);
+  unit = "BSEC";
   loading_handler();
+  delay(500);
   led.Begin();
+  unit = "LED";
   loading_handler();
+  delay(500);
   WiFiManager wifiManager;
+  unit = "WiFi";
   loading_handler();
+  delay(500);
+  wifiManager.setConnectTimeout(60);
   wifiManager.autoConnect();
+  unit = "Connected";
   loading_handler();
-  Serial.println("TEST");
+  delay(500);
   output = "\nBSEC library version " + String(iaqSensor.version.major) + "." + String(iaqSensor.version.minor) + "." + String(iaqSensor.version.major_bugfix) + "." + String(iaqSensor.version.minor_bugfix);
   Serial.println(output);
   checkIaqSensorStatus();
+  unit = "Sensor";
   loading_handler();
+  delay(500);
 
   bsec_virtual_sensor_t sensorList[10] = {
     BSEC_OUTPUT_RAW_TEMPERATURE,
@@ -309,31 +320,20 @@ void setup(void)
   iaqSensor.updateSubscription(sensorList, 10, BSEC_SAMPLE_RATE_LP);
   loading_handler();
   MQTT_connect();
+  unit = "MQTT";
   loading_handler();
+  delay(500);
   checkIaqSensorStatus();
+  unit = "Ready!";
   loading_handler();
+  delay(500);
   StopLoading();
+  led.ShowRainbow();
+  
 }
 /************************* loop Function *********************************/
 void loop(void)
 {
-  Adafruit_MQTT_Subscribe *subscription;
-  while ((subscription = mqtt.readSubscription(5000))) {
-    if (subscription == &restart_topic) {
-      Serial.println((char*)restart_topic.lastread);
-      Serial.println("Restarting.....");
-      ESP.restart();
-    }
-    if (subscription == &led_topic) {
-    uint8_t led_status = atoi((char*)led_topic.lastread);
-    uint8_t led_on = 1;
-    if(led_status == led_on){
-      led.EnableLED(iaqSensor);
-    }else{
-      led.DisableLED();
-    }
-  }
-  }
   unsigned long time_trigger = millis();
   if (iaqSensor.run()) { // If new data is available
     temperature_topic.publish(iaqSensor.temperature);
@@ -350,6 +350,24 @@ void loop(void)
     sliding_handler();
   } else {
     checkIaqSensorStatus();
+    MQTT_connect();
+    Adafruit_MQTT_Subscribe *subscription;
+  while ((subscription = mqtt.readSubscription(1000))) {
+    if (subscription == &restart_topic) {
+      Serial.println((char*)restart_topic.lastread);
+      Serial.println("Restarting.....");
+      ESP.restart();
+    }
+    if (subscription == &led_topic) {
+    uint8_t led_status = atoi((char*)led_topic.lastread);
+    uint8_t led_on = 1;
+    if(led_status == led_on){
+      led.EnableLED(iaqSensor);
+    }else{
+      led.DisableLED();
+    }
+  }
+  }
   
 
   }
@@ -361,19 +379,21 @@ void loading_handler (void){
   if(toggle == 1){
         _display.clearDisplay();
         _display.drawBitmap(
-        (_display.width()  - 32 ) / 2,
+        (_display.width()  - 32 ) / 2 + 32,
         (_display.height() - 32) / 2,
         _loading, 32, 32, 1);
+        float data;
         _display.display();
-        delay(500);
+        ShowData(data);
   }else{
         _display.clearDisplay();
         _display.drawBitmap(
-        (_display.width()  - 32 ) / 2,
-        (_display.height() - 32) / 2,
+        (_display.width()  + 32 ) / 2 + 32,
+        (_display.height() + 32) / 2,
         _loading1, 32, 32, 1);
+        float data;
         _display.display();
-        delay(500);
+        ShowData(data);
     }
   }
 }
